@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Google App1</title>
+
+    <style>
+      #myTable {
+        border-collapse: collapse;
+      }
+
+      td,
+      th {
+        border: 1px solid grey;
+        text-align: left;
+        padding: 8px;
+      }
+
+      tr:nth-child(even) {
+        background-color: lightgrey;
+      }
+
+      #myTableHead {
+        background-color: darkslategrey;
+        color: white;
+      }
+
+      #myTableCaption {
+        font-size: xx-large;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Drive API Quickstart</p>
+    <!--Add buttons to initiate auth sequence and sign out-->
+    <button id="authorizeButton" style="display: none">Authorize</button>
+    <div id="authorizedComponents" style="display: none">
+      <button id="signoutButton" style="display: block">Sign Out</button>
+      <button id="listFilesButton" style="margin-top: 10px">List Files</button>
+      <button id="listFoldersButton">List Folders</button>
+      <button id="listSpreadsheetsButton">List Spreadsheets</button>
+      <button id="createFolderButton">Create Folder</button>
+      <input id="createFolderInput" />
+      <table id="myTable" style="margin-top: 20px">
+        <caption id="myTableCaption"></caption>
+        <thead id="myTableHead"></thead>
+        <tbody id="myTableBody"></tbody>
+        <tfoot id="myTableFoot"></tfoot>
+      </table>
+    </div>
+    <pre id="content" style="white-space: pre-wrap"></pre>
+    <script src="client.js"></script>
+    <script
+      async
+      defer
+      src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()"
+    ></script>
+  </body>
+</html>
