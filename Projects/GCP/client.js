@@ -14,6 +14,9 @@ var DISCOVERY_DOCS = [
 // var SCOPES = "https://www.googleapis.com/auth/drive.file";
 var SCOPES = "https://www.googleapis.com/auth/drive";
 
+const filesFoldersHeadings = ["id", "name", "mime type", "operations"];
+var currentlyDisplaying = "nothing";
+
 var authorizeButton = document.getElementById("authorizeButton");
 var signoutButton = document.getElementById("signoutButton");
 var listFilesButton = document.getElementById("listFilesButton");
@@ -21,6 +24,9 @@ var listFoldersButton = document.getElementById("listFoldersButton");
 var authorizedComponents = document.getElementById("authorizedComponents");
 var listSpreadsheetsButton = document.getElementById("listSpreadsheetsButton");
 var createFolderButton = document.getElementById("createFolderButton");
+var createSpreadsheetButton = document.getElementById(
+  "createSpreadsheetButton"
+);
 var createInput = document.getElementById("createInput");
 
 /**
@@ -55,6 +61,7 @@ function initClient() {
         listFoldersButton.onclick = handleListFoldersClick;
         listSpreadsheetsButton.onclick = handleListSpreadsheetsClick;
         createFolderButton.onclick = handleCreateFolderClick;
+        createSpreadsheetButton.onclick = handleCreateSpreadsheetClick;
       },
       function (error) {
         appendPre(JSON.stringify(error, null, 2));
@@ -113,7 +120,8 @@ function setTableRowsForFilesFolders(files) {
     files.forEach((file, index) => {
       tbodyInnerHtml += `<tr><td>${file.id}</td>`;
       tbodyInnerHtml += `<td>${file.name}</td>`;
-      tbodyInnerHtml += `<td>${file.mimeType}</td></tr>`;
+      tbodyInnerHtml += `<td>${file.mimeType}</td>`;
+      tbodyInnerHtml += `<td><button onclick="handleDeleteFile('${file.id}')">Delete</button></td></tr>`;
     });
   } else {
     tbodyInnerHtml = `<tr><td colspan="3">No Files or Folders</td></tr>`;
@@ -123,6 +131,20 @@ function setTableRowsForFilesFolders(files) {
 
 function displayTable() {
   document.getElementById("myTable").style.display = "table";
+}
+
+function reRenderTable() {
+  switch (currentlyDisplaying) {
+    case "All Files and Folders":
+      handleListFilesClick();
+      break;
+    case "All Folders":
+      handleListFoldersClick();
+      break;
+    case "All Spreadsheets":
+      handleListFilesClick();
+      break;
+  }
 }
 
 /**
@@ -135,8 +157,9 @@ function handleListFilesClick() {
       path: "https://www.googleapis.com/drive/v3/files",
     })
     .then(function (response) {
+      currentlyDisplaying = "All Files and Folders";
       setTableCaption("All Files and Folders");
-      setTableHeadings(["id", "name", "mime type"]);
+      setTableHeadings(filesFoldersHeadings);
       var files = response.result.files;
       setTableRowsForFilesFolders(files);
     });
@@ -149,8 +172,9 @@ function handleListFoldersClick() {
         "https://www.googleapis.com/drive/v3/files?q=mimeType: 'application/vnd.google-apps.folder'",
     })
     .then(function (response) {
+      currentlyDisplaying = "All Folders";
       setTableCaption("All Folders");
-      setTableHeadings(["id", "name", "mime type"]);
+      setTableHeadings(filesFoldersHeadings);
       var files = response.result.files;
       setTableRowsForFilesFolders(files);
     });
@@ -163,8 +187,9 @@ function handleListSpreadsheetsClick() {
         "https://www.googleapis.com/drive/v3/files?q=mimeType: 'application/vnd.google-apps.spreadsheet'",
     })
     .then(function (response) {
+      currentlyDisplaying = "All Spreadsheets";
       setTableCaption("All Spreadsheets");
-      setTableHeadings(["id", "name", "mime type"]);
+      setTableHeadings(filesFoldersHeadings);
       var files = response.result.files;
       setTableRowsForFilesFolders(files);
     });
@@ -183,8 +208,45 @@ function handleCreateFolderClick() {
     })
     .then(function (response) {
       appendPre(`Folder ${folderName} Created Successfully`);
+      reRenderTable();
     })
     .catch((error) => {
       appendPre(`Folder ${folderName} could not be created`);
+    });
+}
+
+function handleCreateSpreadsheetClick() {
+  var spreadsheetName = createInput.value;
+  gapi.client
+    .request({
+      path: "https://www.googleapis.com/drive/v3/files",
+      method: "post",
+      body: {
+        name: spreadsheetName,
+        mimeType: "application/vnd.google-apps.spreadsheet",
+      },
+    })
+    .then(function (response) {
+      appendPre(`Spreadsheet ${spreadsheetName} Created Successfully`);
+      reRenderTable();
+    })
+    .catch((error) => {
+      appendPre(`Spreadsheet ${spreadsheetName} could not be created`);
+    });
+}
+
+function handleDeleteFile(fileId) {
+  console.log(fileId);
+  gapi.client
+    .request({
+      path: `https://www.googleapis.com/drive/v3/files/${fileId}`,
+      method: "delete",
+    })
+    .then(function (response) {
+      appendPre(`File Delete Successfully`);
+      reRenderTable();
+    })
+    .catch((error) => {
+      appendPre("Could not delete file");
     });
 }
