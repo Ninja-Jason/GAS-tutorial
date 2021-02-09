@@ -82,13 +82,13 @@ function handleSignoutClick(event) {
   gapi.auth2.getAuthInstance().signOut();
 }
 
-// function append(message) {
-//   var pre = document.getElementById("content");
-//   var node = document.createElement("div");
-//   var textContent = document.createTextNode(message);
-//   node.appendChild(textContent);
-//   pre.appendChild(node);
-// }
+function append(message) {
+  var pre = document.getElementById("content");
+  var node = document.createElement("div");
+  var textContent = document.createTextNode(message);
+  node.appendChild(textContent);
+  pre.appendChild(node);
+}
 
 function setTableCaption(text) {
   var caption = document.getElementById("myTableCaption");
