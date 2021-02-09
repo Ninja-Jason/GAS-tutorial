@@ -4,32 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Google App1</title>
-
-    <style>
-      #myTable {
-        border-collapse: collapse;
-      }
-
-      td,
-      th {
-        border: 1px solid grey;
-        text-align: left;
-        padding: 8px;
-      }
-
-      tr:nth-child(even) {
-        background-color: lightgrey;
-      }
-
-      #myTableHead {
-        background-color: darkslategrey;
-        color: white;
-      }
-
-      #myTableCaption {
-        font-size: xx-large;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <p>Drive API Quickstart</p>
@@ -40,14 +15,37 @@
       <button id="listFilesButton" style="margin-top: 10px">List Files</button>
       <button id="listFoldersButton">List Folders</button>
       <button id="listSpreadsheetsButton">List Spreadsheets</button>
-      <button id="createFolderButton">Create Folder</button>
-      <button id="createSpreadsheetButton">Create Spreadsheet</button>
-      <input id="createInput" />
-      <table id="myTable" style="margin-top: 20px">
-        <caption id="myTableCaption"></caption>
-        <thead id="myTableHead"></thead>
-        <tbody id="myTableBody"></tbody>
-        <tfoot id="myTableFoot"></tfoot>
+      <div style="margin-top: 5px">
+        <button id="createFolderButton">Create Folder</button>
+        <button id="createSpreadsheetButton">Create Spreadsheet</button>
+      </div>
+      <input
+        id="createInput"
+        style="margin-top: 5px"
+        placeholder="Folder or Spreadsheet name"
+      />
+      <table id="myTable1" style="margin-top: 20px">
+        <caption id="myTable1Caption"></caption>
+        <thead id="myTable1Head"></thead>
+        <tbody id="myTable1Body"></tbody>
+        <tfoot id="myTable1Foot"></tfoot>
+      </table>
+      <div id="addItemDiv" style="display: none; margin-top: 20px">
+        <button id="createNewItemButton" style="display: block">
+          Add New Item
+        </button>
+        <input id="createItemNameInput" placeholder="itemName" />
+        Purchased:
+        <select id="isPurchased">
+          <option value="true">Purchased</option>
+          <option value="false">Not Purchased</option>
+        </select>
+      </div>
+      <table id="myTable2" style="margin-top: 20px">
+        <caption id="myTable2Caption"></caption>
+        <thead id="myTable2Head"></thead>
+        <tbody id="myTable2Body"></tbody>
+        <tfoot id="myTable2Foot"></tfoot>
       </table>
     </div>
     <pre id="content" style="white-space: pre-wrap"></pre>

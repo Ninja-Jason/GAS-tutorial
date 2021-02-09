@@ -1,0 +1,24 @@
+table {
+  border-collapse: collapse;
+  display: none;
+}
+
+td,
+th {
+  border: 1px solid grey;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: lightgrey;
+}
+
+thead {
+  background-color: darkslategrey;
+  color: white;
+}
+
+caption {
+  font-size: xx-large;
+}
