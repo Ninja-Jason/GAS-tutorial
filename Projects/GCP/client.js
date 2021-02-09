@@ -10,7 +10,9 @@ var DISCOVERY_DOCS = [
 
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
-var SCOPES = "https://www.googleapis.com/auth/drive.metadata.readonly";
+// var SCOPES = "https://www.googleapis.com/auth/drive.metadata.readonly";
+// var SCOPES = "https://www.googleapis.com/auth/drive.file";
+var SCOPES = "https://www.googleapis.com/auth/drive";
 
 var authorizeButton = document.getElementById("authorizeButton");
 var signoutButton = document.getElementById("signoutButton");
@@ -19,7 +21,7 @@ var listFoldersButton = document.getElementById("listFoldersButton");
 var authorizedComponents = document.getElementById("authorizedComponents");
 var listSpreadsheetsButton = document.getElementById("listSpreadsheetsButton");
 var createFolderButton = document.getElementById("createFolderButton");
-var createFolderInput = document.getElementById("createFolderInput");
+var createInput = document.getElementById("createInput");
 
 /**
  *  On load, called to load the auth2 library and API client library.
@@ -55,7 +57,7 @@ function initClient() {
         createFolderButton.onclick = handleCreateFolderClick;
       },
       function (error) {
-        append(JSON.stringify(error, null, 2));
+        appendPre(JSON.stringify(error, null, 2));
       }
     );
 }
@@ -82,7 +84,7 @@ function handleSignoutClick(event) {
   gapi.auth2.getAuthInstance().signOut();
 }
 
-function append(message) {
+function appendPre(message) {
   var pre = document.getElementById("content");
   var node = document.createElement("div");
   var textContent = document.createTextNode(message);
@@ -169,22 +171,20 @@ function handleListSpreadsheetsClick() {
 }
 
 function handleCreateFolderClick() {
-  // var access_token = googleAuth.getAccessToken();
-
+  var folderName = createInput.value;
   gapi.client
     .request({
       path: "https://www.googleapis.com/drive/v3/files",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // Authorization: "Bearer " + access_token,
-      },
+      method: "post",
       body: {
-        title: "Folder",
+        name: folderName,
         mimeType: "application/vnd.google-apps.folder",
       },
     })
     .then(function (response) {
-      console.log(response);
+      appendPre(`Folder ${folderName} Created Successfully`);
+    })
+    .catch((error) => {
+      appendPre(`Folder ${folderName} could not be created`);
     });
 }
