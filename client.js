@@ -121,7 +121,7 @@ function setTableRowsForFilesFolders(files) {
       tbodyInnerHtml += `<tr><td>${file.id}</td>`;
       tbodyInnerHtml += `<td>${file.name}</td>`;
       tbodyInnerHtml += `<td>${file.mimeType}</td>`;
-      tbodyInnerHtml += `<td><button onclick="handleDeleteFile('${file.id}')">Delete</button></td></tr>`;
+      tbodyInnerHtml += `<td><button onclick="handleDisplaySheetData('${file.id}')">Display</button> <button onclick="handleDeleteFile('${file.id}')">Delete</button></td>`;
     });
   } else {
     tbodyInnerHtml = `<tr><td colspan="3">No Files or Folders</td></tr>`;
@@ -162,6 +162,27 @@ function handleListFilesClick() {
       setTableHeadings(filesFoldersHeadings);
       var files = response.result.files;
       setTableRowsForFilesFolders(files);
+    });
+}
+
+function handleDisplayFileData(fileId) {
+  displayTable();
+  gapi.client
+    .request({
+      path: `https://www.googleapis.com/drive/v3/files/${fileId}?fields=*`,
+    })
+    .then(function (response) {
+      console.log(response);
+    });
+}
+
+function handleDisplaySheetData(fileId) {
+  gapi.client
+    .request({
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${fileId}`,
+    })
+    .then(function (response) {
+      console.log(response);
     });
 }
 
