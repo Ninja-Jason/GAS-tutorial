@@ -121,7 +121,30 @@ function setTableRowsForFilesFolders(files) {
       tbodyInnerHtml += `<tr><td>${file.id}</td>`;
       tbodyInnerHtml += `<td>${file.name}</td>`;
       tbodyInnerHtml += `<td>${file.mimeType}</td>`;
-      tbodyInnerHtml += `<td><button onclick="handleDisplaySheetData('${file.id}')">Display</button> <button onclick="handleDeleteFile('${file.id}')">Delete</button></td>`;
+      tbodyInnerHtml += `<td><button onclick="${
+        file.mimeType === "application/vnd.google-apps.spreadsheet"
+          ? `handleDisplaySheetData('${file.id}')`
+          : `handleDisplayFileData('${file.id}')`
+      }">Display</button> <button onclick="handleDeleteFile('${
+        file.id
+      }')">Delete</button></td>`;
+    });
+  } else {
+    tbodyInnerHtml = `<tr><td colspan="3">No Files or Folders</td></tr>`;
+  }
+  tbody.innerHTML = tbodyInnerHtml;
+}
+
+function setTableRowsForSheets(sheetData) {
+  var tbody = document.getElementById("myTableBody");
+  let tbodyInnerHtml = ``;
+  if (sheetData && sheetData.length > 0) {
+    sheetData.forEach((row, index) => {
+      tbodyInnerHtml += `<tr>`;
+      for (column in row) {
+        tbodyInnerHtml += `<td>${row[column]}</td>`;
+      }
+      tbodyInnerHtml += `</tr>`;
     });
   } else {
     tbodyInnerHtml = `<tr><td colspan="3">No Files or Folders</td></tr>`;
@@ -179,10 +202,30 @@ function handleDisplayFileData(fileId) {
 function handleDisplaySheetData(fileId) {
   gapi.client
     .request({
-      path: `https://sheets.googleapis.com/v4/spreadsheets/${fileId}`,
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${fileId}?includeGridData=true`,
     })
     .then(function (response) {
-      console.log(response);
+      // console.log(response.result.sheets[0].data[0].rowData[0]);
+      let sheetData = response.result.sheets[0].data[0].rowData.map(
+        (row, rowIndex) =>
+          row.values.map((column, columnIndex) => column.formattedValue)
+      );
+      // console.log(sheetData);
+
+      let headings = sheetData.shift();
+      // console.log(headings);
+      let data = sheetData.map((row, rowIndex) => {
+        let object = {};
+        row.forEach((columnData, columnIndex) => {
+          object = { ...object, [`${headings[columnIndex]}`]: columnData };
+        });
+        return object;
+      });
+      // console.log(data);
+
+      setTableCaption("Sheet Data");
+      setTableHeadings(headings);
+      setTableRowsForSheets(data);
     });
 }
 
@@ -257,7 +300,7 @@ function handleCreateSpreadsheetClick() {
 }
 
 function handleDeleteFile(fileId) {
-  console.log(fileId);
+  // console.log(fileId);
   gapi.client
     .request({
       path: `https://www.googleapis.com/drive/v3/files/${fileId}`,
