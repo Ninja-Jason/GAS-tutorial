@@ -268,15 +268,19 @@ function setTable3Headings(headings) {
   thead.innerHTML = theadInnerHtml.innerHTML;
 }
 
-function setTable3Rows(data) {
+function setTable3Rows(permissions) {
   var tbody = document.getElementById("table3Body");
   let tbodyInnerHtml = ``;
-  if (data && data.length > 0) {
-    data.forEach((row, index) => {
+  if (permissions && permissions.length > 0) {
+    permissions.forEach((permission, index) => {
       tbodyInnerHtml += `<tr>`;
-      for (column in row) {
-        tbodyInnerHtml += `<td>${row[column]}</td>`;
-      }
+      tbodyInnerHtml += `<td>${permission.displayName}</td>`;
+      tbodyInnerHtml += `<td>${permission.emailAddress}</td>`;
+      tbodyInnerHtml += `<td>${permission.role}</td>`;
+      tbodyInnerHtml += `<td>${permission.type}</td>`;
+      tbodyInnerHtml += `<td>`;
+      tbodyInnerHtml += `<button onclick="handleRemoveShareFile('${permission.id}')">unShare</`;
+      tbodyInnerHtml += `</td>`;
       tbodyInnerHtml += `</tr>`;
     });
   } else {
@@ -336,11 +340,12 @@ function handleDisplayFileSharedWith(fileId) {
           emailAddress: perm.emailAddress,
           role: perm.role,
           type: perm.type,
+          id: perm.id,
         };
       });
       // console.log(sharedWith);
       setTable3Caption(`File (${JSON.parse(response.body).name}) Shared with`);
-      setTable3Headings(["Name", "Email", "Role", "Type"]);
+      setTable3Headings(["Name", "Email", "Role", "Type", "Operations"]);
       setTable3Rows(sharedWith);
     });
 }
@@ -478,14 +483,15 @@ function handleShareFile() {
     });
 }
 
-function handleRemoveShareFile() {
+function handleRemoveShareFile(permissionId) {
   gapi.client
     .request({
-      path: `https://www.googleapis.com/drive/v3/files/1dF5UjOHWyukCNqFiJQH4f3h6h4uniw-CgWlbs1aoOhE/permissions/13934111265224148781`,
+      path: `https://www.googleapis.com/drive/v3/files/${currentSharedFileId}/permissions/${permissionId}`,
       method: "delete",
     })
     .then((response) => {
       // console.log(response);
+      handleDisplayFileSharedWith(currentSharedFileId);
     });
 }
 
@@ -494,8 +500,7 @@ function handleCreateNewItemClick() {
   var isPurchased = document.getElementById("isPurchased").value;
   gapi.client
     .request({
-      path:
-        "https://sheets.googleapis.com/v4/spreadsheets/15jOZlvU074FoyE820juoCalC-w8NB1DWgCuSPXSGF1I/values/Sheet1!A1:D1:append?valueInputOption=USER_ENTERED",
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/Sheet1!A1:D1:append?valueInputOption=USER_ENTERED`,
       method: "post",
       body: {
         values: [[itemName, isPurchased]],
