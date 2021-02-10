@@ -17,6 +17,34 @@ var SCOPES = "https://www.googleapis.com/auth/drive";
 const filesFoldersHeadings = ["id", "name", "mime type", "operations"];
 var table1currentlyDisplaying = "nothing";
 var currentSheetId = "";
+const alphabet = [
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "J",
+  "K",
+  "L",
+  "M",
+  "N",
+  "O",
+  "P",
+  "Q",
+  "R",
+  "S",
+  "T",
+  "U",
+  "V",
+  "W",
+  "X",
+  "Y",
+  "Z",
+];
 
 var authorizeButton = document.getElementById("authorizeButton");
 var signoutButton = document.getElementById("signoutButton");
@@ -205,8 +233,9 @@ function setTable2RowsForSheets(sheetData) {
     sheetData.forEach((row, index) => {
       tbodyInnerHtml += `<tr>`;
       for (column in row) {
-        tbodyInnerHtml += `<td>${row[column]}</td>`;
+        tbodyInnerHtml += `<td><input class="itemNumber${index}" value='${row[column]}'/></td>`;
       }
+      tbodyInnerHtml += `<td><button onclick="handleUpdateItem('itemNumber${index}')"/>Save</button>`;
       tbodyInnerHtml += `</tr>`;
     });
   } else {
@@ -281,8 +310,15 @@ function handleDisplaySheetData(fileId) {
       let data = sheetData.map((row, rowIndex) => {
         let object = {};
         row.forEach((columnData, columnIndex) => {
-          object = { ...object, [`${headings[columnIndex]}`]: columnData };
+          object = {
+            ...object,
+            [`${headings[columnIndex]}`]: columnData,
+          };
         });
+        object = {
+          ...object,
+          range: `A${rowIndex + 2}:${alphabet[row.length - 1]}${rowIndex + 2}`,
+        };
         return object;
       });
       console.log(data);
@@ -411,5 +447,24 @@ function handleCreateNewItemClick() {
     })
     .catch((error) => {
       appendPre(`Spreadsheet ${itemName} could not be created`);
+    });
+}
+
+function handleUpdateItem(itemClassName) {
+  var itemData = [].slice.call(document.getElementsByClassName(itemClassName));
+  itemData = itemData.map((item) => item.value);
+  var range = itemData.pop();
+  console.log(itemData);
+  console.log(range);
+  gapi.client
+    .request({
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+      method: "put",
+      body: {
+        values: [itemData],
+      },
+    })
+    .then(function (response) {
+      handleDisplaySheetData(currentSheetId);
     });
 }
