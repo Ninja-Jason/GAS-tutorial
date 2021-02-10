@@ -235,8 +235,11 @@ function setTable2RowsForSheets(sheetData) {
       for (column in row) {
         tbodyInnerHtml += `<td><input class="itemNumber${index}" value='${row[column]}'/></td>`;
       }
+      tbodyInnerHtml += `<td>`;
       tbodyInnerHtml += `<td><button onclick="handleUpdateItem('itemNumber${index}')"/>Save</button>`;
-      tbodyInnerHtml += `<button onclick="handleClearItem('itemNumber${index}')"/>Clear</button></td>`;
+      tbodyInnerHtml += `<button onclick="handleClearItem('itemNumber${index}')"/>Clear</button>`;
+      tbodyInnerHtml += `<button onclick="handleRemoveItem(${index})"/>Remove</button>`;
+      tbodyInnerHtml += `</td>`;
       tbodyInnerHtml += `</tr>`;
     });
   } else {
@@ -455,8 +458,6 @@ function handleUpdateItem(itemClassName) {
   var itemData = [].slice.call(document.getElementsByClassName(itemClassName));
   itemData = itemData.map((item) => item.value);
   var range = itemData.pop();
-  console.log(itemData);
-  console.log(range);
   gapi.client
     .request({
       path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}?valueInputOption=USER_ENTERED`,
@@ -478,9 +479,38 @@ function handleClearItem(itemClassName) {
   console.log(range);
   gapi.client
     .request({
-      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}:clear`,
+      // path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}:clear`,
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values:batchClear`,
       method: "post",
-      body: {},
+      body: { ranges: [range] },
+    })
+    .then(function (response) {
+      handleDisplaySheetData(currentSheetId);
+    });
+}
+
+function handleRemoveItem(itemRowNumber) {
+  gapi.client
+    .request({
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}:batchUpdate`,
+      method: "post",
+      body: {
+        requests: [
+          {
+            deleteDimension: {
+              range: {
+                sheetId: 0,
+                dimension: "ROWS",
+                startIndex: itemRowNumber + 1,
+                endIndex: itemRowNumber + 2,
+              },
+            },
+          },
+        ],
+        includeSpreadsheetInResponse: false,
+        responseRanges: [""],
+        responseIncludeGridData: false,
+      },
     })
     .then(function (response) {
       handleDisplaySheetData(currentSheetId);
