@@ -59,7 +59,6 @@ var createSpreadsheetButton = document.getElementById(
 );
 var createInput = document.getElementById("createInput");
 var createNewItemButton = document.getElementById("createNewItemButton");
-var removeShareButton = document.getElementById("removeShareButton");
 var shareButton = document.getElementById("shareButton");
 
 /**
@@ -96,7 +95,6 @@ function initClient() {
         createFolderButton.onclick = handleCreateFolderClick;
         createSpreadsheetButton.onclick = handleCreateSpreadsheetClick;
         createNewItemButton.onclick = handleCreateNewItemClick;
-        removeShareButton.onclick = handleRemoveShareFile;
         shareButton.onclick = handleShareFile;
       },
       function (error) {
