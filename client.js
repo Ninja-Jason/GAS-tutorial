@@ -236,6 +236,7 @@ function setTable2RowsForSheets(sheetData) {
         tbodyInnerHtml += `<td><input class="itemNumber${index}" value='${row[column]}'/></td>`;
       }
       tbodyInnerHtml += `<td><button onclick="handleUpdateItem('itemNumber${index}')"/>Save</button>`;
+      tbodyInnerHtml += `<button onclick="handleClearItem('itemNumber${index}')"/>Clear</button></td>`;
       tbodyInnerHtml += `</tr>`;
     });
   } else {
@@ -463,6 +464,23 @@ function handleUpdateItem(itemClassName) {
       body: {
         values: [itemData],
       },
+    })
+    .then(function (response) {
+      handleDisplaySheetData(currentSheetId);
+    });
+}
+
+function handleClearItem(itemClassName) {
+  var itemData = [].slice.call(document.getElementsByClassName(itemClassName));
+  itemData = itemData.map((item) => item.value);
+  var range = itemData.pop();
+  console.log(itemData);
+  console.log(range);
+  gapi.client
+    .request({
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}:clear`,
+      method: "post",
+      body: {},
     })
     .then(function (response) {
       handleDisplaySheetData(currentSheetId);
