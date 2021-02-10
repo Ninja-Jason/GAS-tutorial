@@ -17,6 +17,7 @@ var SCOPES = "https://www.googleapis.com/auth/drive";
 const filesFoldersHeadings = ["id", "name", "mime type", "operations"];
 var table1currentlyDisplaying = "nothing";
 var currentSheetId = "";
+var currentSharedFileId = "";
 const alphabet = [
   "A",
   "B",
@@ -59,6 +60,7 @@ var createSpreadsheetButton = document.getElementById(
 var createInput = document.getElementById("createInput");
 var createNewItemButton = document.getElementById("createNewItemButton");
 var removeShareButton = document.getElementById("removeShareButton");
+var shareButton = document.getElementById("shareButton");
 
 /**
  *  On load, called to load the auth2 library and API client library.
@@ -95,6 +97,7 @@ function initClient() {
         createSpreadsheetButton.onclick = handleCreateSpreadsheetClick;
         createNewItemButton.onclick = handleCreateNewItemClick;
         removeShareButton.onclick = handleRemoveShareFile;
+        shareButton.onclick = handleShareFile;
       },
       function (error) {
         appendPre(JSON.stringify(error, null, 2));
@@ -134,16 +137,16 @@ function appendPre(message) {
 
 // table 1
 function displayTable1() {
-  document.getElementById("myTable1").style.display = "table";
+  document.getElementById("table1").style.display = "table";
 }
 
 function setTable1Caption(text) {
-  var caption = document.getElementById("myTable1Caption");
+  var caption = document.getElementById("table1Caption");
   caption.innerHTML = text;
 }
 
 function setTable1Headings(headings) {
-  var thead = document.getElementById("myTable1Head");
+  var thead = document.getElementById("table1Head");
   let theadInnerHtml = document.createElement("tr");
   headings.forEach((heading) => {
     theadInnerHtml.innerHTML += `<th>${heading}</th>`;
@@ -152,7 +155,7 @@ function setTable1Headings(headings) {
 }
 
 function setTable1RowsForFilesFolders(files) {
-  var tbody = document.getElementById("myTable1Body");
+  var tbody = document.getElementById("table1Body");
   let tbodyInnerHtml = ``;
   if (files && files.length > 0) {
     files.forEach((file, index) => {
@@ -166,7 +169,7 @@ function setTable1RowsForFilesFolders(files) {
       }
       tbodyInnerHtml += `<button onclick="handleDisplayFileSharedWith('${file.id}')">Display Shared With</button>`;
       tbodyInnerHtml += `<button onclick="handleDeleteFile('${file.id}')">Delete</button>`;
-      tbodyInnerHtml += `<button onclick="handleShareFile('${file.id}')">Share</button>`;
+      // tbodyInnerHtml += `<button onclick="handleShareFile('${file.id}')">Share</button>`;
     });
   } else {
     tbodyInnerHtml = `<tr><td colspan="3">No Files or Folders</td></tr>`;
@@ -194,7 +197,7 @@ function displayAddItemDiv() {
 }
 
 function displayTable2() {
-  document.getElementById("myTable2").style.display = "table";
+  document.getElementById("table2").style.display = "table";
   displayAddItemDiv();
 }
 
@@ -203,12 +206,12 @@ function reRenderTable2() {
 }
 
 function setTable2Caption(text) {
-  var caption = document.getElementById("myTable2Caption");
+  var caption = document.getElementById("table2Caption");
   caption.innerHTML = text;
 }
 
 function setTable2Headings(headings) {
-  var thead = document.getElementById("myTable2Head");
+  var thead = document.getElementById("table2Head");
   let theadInnerHtml = document.createElement("tr");
   headings.forEach((heading) => {
     theadInnerHtml.innerHTML += `<th>${heading}</th>`;
@@ -217,7 +220,7 @@ function setTable2Headings(headings) {
 }
 
 function setTable2RowsForSheets(sheetData) {
-  var tbody = document.getElementById("myTable2Body");
+  var tbody = document.getElementById("table2Body");
   let tbodyInnerHtml = ``;
   if (sheetData && sheetData.length > 0) {
     sheetData.forEach((row, index) => {
@@ -239,9 +242,12 @@ function setTable2RowsForSheets(sheetData) {
 }
 
 // table 3
+function displayShareDiv() {
+  document.getElementById("shareDiv").style.display = "block";
+}
 function displayTable3() {
-  document.getElementById("myTable3").style.display = "table";
-  displayAddItemDiv();
+  document.getElementById("table3").style.display = "table";
+  displayShareDiv();
 }
 
 function reRenderTable3() {
@@ -249,12 +255,12 @@ function reRenderTable3() {
 }
 
 function setTable3Caption(text) {
-  var caption = document.getElementById("myTable3Caption");
+  var caption = document.getElementById("table3Caption");
   caption.innerHTML = text;
 }
 
 function setTable3Headings(headings) {
-  var thead = document.getElementById("myTable3Head");
+  var thead = document.getElementById("table3Head");
   let theadInnerHtml = document.createElement("tr");
   headings.forEach((heading) => {
     theadInnerHtml.innerHTML += `<th>${heading}</th>`;
@@ -263,7 +269,7 @@ function setTable3Headings(headings) {
 }
 
 function setTable3Rows(data) {
-  var tbody = document.getElementById("myTable3Body");
+  var tbody = document.getElementById("table3Body");
   let tbodyInnerHtml = ``;
   if (data && data.length > 0) {
     data.forEach((row, index) => {
@@ -323,6 +329,7 @@ function handleDisplayFileSharedWith(fileId) {
       // console.log(response);
       // console.log(JSON.parse(response.body));
       // console.log(response.result.permissions);
+      currentSharedFileId = response.result.id;
       var sharedWith = response.result.permissions.map((perm) => {
         return {
           displayName: perm.displayName,
@@ -453,19 +460,21 @@ function handleDeleteFile(fileId) {
     });
 }
 
-function handleShareFile(fileId) {
+function handleShareFile() {
+  var email = document.getElementById("shareInput").value;
   gapi.client
     .request({
-      path: `https://www.googleapis.com/drive/v3/files/${fileId}/permissions?emailMessage='Good Morning Edvaldo please find attached the Shopping List for the month'`,
+      path: `https://www.googleapis.com/drive/v3/files/${currentSharedFileId}/permissions?emailMessage='Good day. Please find attached the Shopping List of the month.'`,
       method: "post",
       body: {
         role: "writer",
         type: "user",
-        emailAddress: "edvaldo@nanosoft.co.za",
+        emailAddress: email,
       },
     })
     .then((response) => {
       // console.log(response);
+      handleDisplayFileSharedWith(currentSharedFileId);
     });
 }
 
@@ -526,8 +535,8 @@ function handleClearItem(itemClassName) {
   // console.log(range);
   gapi.client
     .request({
-      // path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}:clear`,
-      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values:batchClear`,
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}:clear`,
+      // path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values:batchClear`,
       method: "post",
       body: { ranges: [range] },
     })

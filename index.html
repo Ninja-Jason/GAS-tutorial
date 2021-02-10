@@ -27,11 +27,11 @@
         style="margin-top: 5px"
         placeholder="Folder or Spreadsheet name"
       />
-      <table id="myTable1" style="margin-top: 20px">
-        <caption id="myTable1Caption"></caption>
-        <thead id="myTable1Head"></thead>
-        <tbody id="myTable1Body"></tbody>
-        <tfoot id="myTable1Foot"></tfoot>
+      <table id="table1" style="margin-top: 20px">
+        <caption id="table1Caption"></caption>
+        <thead id="table1Head"></thead>
+        <tbody id="table1Body"></tbody>
+        <tfoot id="table1Foot"></tfoot>
       </table>
       <div id="addItemDiv" style="display: none; margin-top: 20px">
         <button id="createNewItemButton" style="display: block">
@@ -44,18 +44,22 @@
           <option value="false">Not Purchased</option>
         </select>
       </div>
-      <table id="myTable2" style="margin-top: 20px">
-        <caption id="myTable2Caption"></caption>
-        <thead id="myTable2Head"></thead>
-        <tbody id="myTable2Body"></tbody>
-        <tfoot id="myTable2Foot"></tfoot>
+      <table id="table2" style="margin-top: 20px">
+        <caption id="table2Caption"></caption>
+        <thead id="table2Head"></thead>
+        <tbody id="table2Body"></tbody>
+        <tfoot id="table2Foot"></tfoot>
       </table>
-      <table id="myTable3" style="margin-top: 20px">
-        <caption id="myTable3Caption"></caption>
-        <thead id="myTable3Head"></thead>
-        <tbody id="myTable3Body"></tbody>
-        <tfoot id="myTable3Foot"></tfoot>
-      </table>
+      <div id="shareDiv" style="display: none; margin-top: 20px">
+        <button id="shareButton" style="display: block">Share</button>
+        <input type="email" id="shareInput" placeholder="user@nanosoft.co.za" />
+        <table id="table3" style="margin-top: 20px">
+          <caption id="table3Caption"></caption>
+          <thead id="table3Head"></thead>
+          <tbody id="table3Body"></tbody>
+          <tfoot id="table3Foot"></tfoot>
+        </table>
+      </div>
     </div>
     <pre id="content" style="white-space: pre-wrap"></pre>
     <script src="client.js"></script>
