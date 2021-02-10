@@ -30,6 +30,7 @@ var createSpreadsheetButton = document.getElementById(
 );
 var createInput = document.getElementById("createInput");
 var createNewItemButton = document.getElementById("createNewItemButton");
+var removeShareButton = document.getElementById("removeShareButton");
 
 /**
  *  On load, called to load the auth2 library and API client library.
@@ -65,6 +66,7 @@ function initClient() {
         createFolderButton.onclick = handleCreateFolderClick;
         createSpreadsheetButton.onclick = handleCreateSpreadsheetClick;
         createNewItemButton.onclick = handleCreateNewItemClick;
+        removeShareButton.onclick = handleRemoveShareFile;
       },
       function (error) {
         appendPre(JSON.stringify(error, null, 2));
@@ -130,24 +132,23 @@ function setTable1RowsForFilesFolders(files) {
       tbodyInnerHtml += `<td>${file.id}</td>`;
       tbodyInnerHtml += `<td>${file.name}</td>`;
       tbodyInnerHtml += `<td>${file.mimeType}</td>`;
-      tbodyInnerHtml += `<td><button onclick="${
-        file.mimeType === "application/vnd.google-apps.spreadsheet"
-          ? `handleDisplaySheetData('${file.id}')`
-          : `handleDisplayFileData('${file.id}')`
-      }">Display</button> <button onclick="handleDeleteFile('${
-        file.id
-      }')">Delete</button></td>`;
-      tbodyInnerHtml += `</tr>`;
       // tbodyInnerHtml += `<td><button onclick="${
       //   file.mimeType === "application/vnd.google-apps.spreadsheet"
       //     ? `handleDisplaySheetData('${file.id}')`
       //     : `handleDisplayFileData('${file.id}')`
       // }">Display</button> <button onclick="handleDeleteFile('${
       //   file.id
-      // }')">Delete</button> <button onclick="handleShareFile('${
-      //   file.id
-      // }')">Share</button></td>`;
-      // tbodyInnerHtml += `</tr>`;
+      // }')">Delete</button></td>`;
+      tbodyInnerHtml += `<td><button onclick="${
+        file.mimeType === "application/vnd.google-apps.spreadsheet"
+          ? `handleDisplaySheetData('${file.id}')`
+          : `handleDisplayFileData('${file.id}')`
+      }">Display</button> <button onclick="handleDeleteFile('${
+        file.id
+      }')">Delete</button> <button onclick="handleShareFile('${
+        file.id
+      }')">Share</button></td>`;
+      tbodyInnerHtml += `</tr>`;
     });
   } else {
     tbodyInnerHtml = `<tr><td colspan="3">No Files or Folders</td></tr>`;
@@ -232,6 +233,7 @@ function handleListFilesClick() {
 }
 
 function handleListFoldersClick() {
+  displayTable1();
   gapi.client
     .request({
       path:
@@ -254,7 +256,7 @@ function handleDisplayFileData(fileId) {
       path: `https://www.googleapis.com/drive/v3/files/${fileId}?fields=*`,
     })
     .then(function (response) {
-      console.log(response);
+      console.log(response.result.permissions.map((perm) => perm.displayName));
     });
 }
 
@@ -283,7 +285,7 @@ function handleDisplaySheetData(fileId) {
         });
         return object;
       });
-      // console.log(data);
+      console.log(data);
 
       setTable2Caption("Sheet Data");
       setTable2Headings(headings);
@@ -366,13 +368,24 @@ function handleDeleteFile(fileId) {
 function handleShareFile(fileId) {
   gapi.client
     .request({
-      path: `https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=true`,
+      path: `https://www.googleapis.com/drive/v3/files/${fileId}/permissions?emailMessage='Good Morning Edvaldo please find attached the Shopping List for the month'`,
       method: "post",
       body: {
-        role: "reader",
+        role: "writer",
         type: "user",
-        emailAddress: "jsntrou@gmail.com",
+        emailAddress: "edvaldo@nanosoft.co.za",
       },
+    })
+    .then((response) => {
+      console.log(response);
+    });
+}
+
+function handleRemoveShareFile() {
+  gapi.client
+    .request({
+      path: `https://www.googleapis.com/drive/v3/files/1dF5UjOHWyukCNqFiJQH4f3h6h4uniw-CgWlbs1aoOhE/permissions/13934111265224148781`,
+      method: "delete",
     })
     .then((response) => {
       console.log(response);
