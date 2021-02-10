@@ -160,23 +160,13 @@ function setTable1RowsForFilesFolders(files) {
       tbodyInnerHtml += `<td>${file.id}</td>`;
       tbodyInnerHtml += `<td>${file.name}</td>`;
       tbodyInnerHtml += `<td>${file.mimeType}</td>`;
-      // tbodyInnerHtml += `<td><button onclick="${
-      //   file.mimeType === "application/vnd.google-apps.spreadsheet"
-      //     ? `handleDisplaySheetData('${file.id}')`
-      //     : `handleDisplayFileData('${file.id}')`
-      // }">Display</button> <button onclick="handleDeleteFile('${
-      //   file.id
-      // }')">Delete</button></td>`;
-      tbodyInnerHtml += `<td><button onclick="${
-        file.mimeType === "application/vnd.google-apps.spreadsheet"
-          ? `handleDisplaySheetData('${file.id}')`
-          : `handleDisplayFileData('${file.id}')`
-      }">Display</button> <button onclick="handleDeleteFile('${
-        file.id
-      }')">Delete</button> <button onclick="handleShareFile('${
-        file.id
-      }')">Share</button></td>`;
-      tbodyInnerHtml += `</tr>`;
+      tbodyInnerHtml += `<td>`;
+      if (file.mimeType === "application/vnd.google-apps.spreadsheet") {
+        tbodyInnerHtml += `<button onclick="handleDisplaySheetData('${file.id}')">Display Data</button>`;
+      }
+      tbodyInnerHtml += `<button onclick="handleDisplayFileSharedWith('${file.id}')">Display Shared With</button>`;
+      tbodyInnerHtml += `<button onclick="handleDeleteFile('${file.id}')">Delete</button>`;
+      tbodyInnerHtml += `<button onclick="handleShareFile('${file.id}')">Share</button>`;
     });
   } else {
     tbodyInnerHtml = `<tr><td colspan="3">No Files or Folders</td></tr>`;
@@ -236,10 +226,51 @@ function setTable2RowsForSheets(sheetData) {
         tbodyInnerHtml += `<td><input class="itemNumber${index}" value='${row[column]}'/></td>`;
       }
       tbodyInnerHtml += `<td>`;
-      tbodyInnerHtml += `<td><button onclick="handleUpdateItem('itemNumber${index}')"/>Save</button>`;
+      tbodyInnerHtml += `<button onclick="handleUpdateItem('itemNumber${index}')"/>Save</button>`;
       tbodyInnerHtml += `<button onclick="handleClearItem('itemNumber${index}')"/>Clear</button>`;
       tbodyInnerHtml += `<button onclick="handleRemoveItem(${index})"/>Remove</button>`;
       tbodyInnerHtml += `</td>`;
+      tbodyInnerHtml += `</tr>`;
+    });
+  } else {
+    tbodyInnerHtml = `<tr><td colspan="3">No Files or Folders</td></tr>`;
+  }
+  tbody.innerHTML = tbodyInnerHtml;
+}
+
+// table 3
+function displayTable3() {
+  document.getElementById("myTable3").style.display = "table";
+  displayAddItemDiv();
+}
+
+function reRenderTable3() {
+  handleDisplaySheetData(currentSheetId);
+}
+
+function setTable3Caption(text) {
+  var caption = document.getElementById("myTable3Caption");
+  caption.innerHTML = text;
+}
+
+function setTable3Headings(headings) {
+  var thead = document.getElementById("myTable3Head");
+  let theadInnerHtml = document.createElement("tr");
+  headings.forEach((heading) => {
+    theadInnerHtml.innerHTML += `<th>${heading}</th>`;
+  });
+  thead.innerHTML = theadInnerHtml.innerHTML;
+}
+
+function setTable3Rows(data) {
+  var tbody = document.getElementById("myTable3Body");
+  let tbodyInnerHtml = ``;
+  if (data && data.length > 0) {
+    data.forEach((row, index) => {
+      tbodyInnerHtml += `<tr>`;
+      for (column in row) {
+        tbodyInnerHtml += `<td>${row[column]}</td>`;
+      }
       tbodyInnerHtml += `</tr>`;
     });
   } else {
@@ -256,7 +287,7 @@ function handleListFilesClick() {
       path: "https://www.googleapis.com/drive/v3/files",
     })
     .then(function (response) {
-      console.log(response);
+      // console.log(response);
       table1currentlyDisplaying = "All Files and Folders";
       setTable1Caption("All Files and Folders");
       setTable1Headings(filesFoldersHeadings);
@@ -282,14 +313,28 @@ function handleListFoldersClick() {
 }
 
 // display file data
-function handleDisplayFileData(fileId) {
-  displayTable1();
+function handleDisplayFileSharedWith(fileId) {
+  displayTable3();
   gapi.client
     .request({
       path: `https://www.googleapis.com/drive/v3/files/${fileId}?fields=*`,
     })
     .then(function (response) {
-      console.log(response.result.permissions.map((perm) => perm.displayName));
+      // console.log(response);
+      // console.log(JSON.parse(response.body));
+      // console.log(response.result.permissions);
+      var sharedWith = response.result.permissions.map((perm) => {
+        return {
+          displayName: perm.displayName,
+          emailAddress: perm.emailAddress,
+          role: perm.role,
+          type: perm.type,
+        };
+      });
+      // console.log(sharedWith);
+      setTable3Caption(`File (${JSON.parse(response.body).name}) Shared with`);
+      setTable3Headings(["Name", "Email", "Role", "Type"]);
+      setTable3Rows(sharedWith);
     });
 }
 
@@ -301,7 +346,8 @@ function handleDisplaySheetData(fileId) {
       path: `https://sheets.googleapis.com/v4/spreadsheets/${fileId}?includeGridData=true`,
     })
     .then(function (response) {
-      console.log(response);
+      // console.log(response);
+      // console.log(JSON.parse(response.body));
       // console.log(response.result.sheets[0].data[0].rowData[0]);
       let sheetData = response.result.sheets[0].data[0].rowData.map(
         (row, rowIndex) =>
@@ -325,10 +371,12 @@ function handleDisplaySheetData(fileId) {
         };
         return object;
       });
-      console.log(data);
+      // console.log(data);
 
-      setTable2Caption("Sheet Data");
-      setTable2Headings(headings);
+      setTable2Caption(
+        `Sheet (${JSON.parse(response.body).properties.title}) Data`
+      );
+      setTable2Headings([...headings, "coordinates", "operations"]);
       setTable2RowsForSheets(data);
     });
 }
@@ -417,7 +465,7 @@ function handleShareFile(fileId) {
       },
     })
     .then((response) => {
-      console.log(response);
+      // console.log(response);
     });
 }
 
@@ -428,7 +476,7 @@ function handleRemoveShareFile() {
       method: "delete",
     })
     .then((response) => {
-      console.log(response);
+      // console.log(response);
     });
 }
 
@@ -445,8 +493,7 @@ function handleCreateNewItemClick() {
       },
     })
     .then(function (response) {
-      console.log(response);
-      appendPre(`Spreadsheet ${itemName} Created Successfully`);
+      // console.log(response);
       reRenderTable2();
     })
     .catch((error) => {
@@ -475,8 +522,8 @@ function handleClearItem(itemClassName) {
   var itemData = [].slice.call(document.getElementsByClassName(itemClassName));
   itemData = itemData.map((item) => item.value);
   var range = itemData.pop();
-  console.log(itemData);
-  console.log(range);
+  // console.log(itemData);
+  // console.log(range);
   gapi.client
     .request({
       // path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}:clear`,
