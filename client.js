@@ -474,12 +474,13 @@ function handleDeleteFile(fileId) {
 
 function handleShareFile() {
   var email = document.getElementById("shareInput").value;
+  var role = document.getElementById("shareSelect").value;
   gapi.client
     .request({
       path: `https://www.googleapis.com/drive/v3/files/${currentSharedFileId}/permissions?emailMessage='Good day. Please find attached the Shopping List of the month.'`,
       method: "POST",
       body: {
-        role: "writer",
+        role: role,
         type: "user",
         emailAddress: email,
       },
