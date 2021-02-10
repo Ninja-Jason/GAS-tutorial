@@ -46,6 +46,7 @@ const alphabet = [
   "Y",
   "Z",
 ];
+const roles = ["owner", "writer", "reader", "commenter"];
 
 var authorizeButton = document.getElementById("authorizeButton");
 var signoutButton = document.getElementById("signoutButton");
@@ -274,10 +275,18 @@ function setTable3Rows(permissions) {
       tbodyInnerHtml += `<tr>`;
       tbodyInnerHtml += `<td>${permission.displayName}</td>`;
       tbodyInnerHtml += `<td>${permission.emailAddress}</td>`;
-      tbodyInnerHtml += `<td>${permission.role}</td>`;
+      tbodyInnerHtml += `<td><select id="roleSelect${permission.id}"
+      >${roles
+        .map((role) => {
+          return `<option value="${role}" ${
+            permission.role === role ? "selected" : ""
+          }>${role}</option>`;
+        })
+        .toString()}</select></td>`;
       tbodyInnerHtml += `<td>${permission.type}</td>`;
       tbodyInnerHtml += `<td>`;
-      tbodyInnerHtml += `<button onclick="handleRemoveShareFile('${permission.id}')">unShare</`;
+      tbodyInnerHtml += `<button onclick="handleUpdateSharedFileRole('${permission.id}',roleSelect${permission.id}.value)">Update</button>`;
+      tbodyInnerHtml += `<button onclick="handleRemoveShareFile('${permission.id}')">unShare</button>`;
       tbodyInnerHtml += `</td>`;
       tbodyInnerHtml += `</tr>`;
     });
@@ -412,7 +421,7 @@ function handleCreateFolderClick() {
   gapi.client
     .request({
       path: "https://www.googleapis.com/drive/v3/files",
-      method: "post",
+      method: "POST",
       body: {
         name: folderName,
         mimeType: "application/vnd.google-apps.folder",
@@ -432,7 +441,7 @@ function handleCreateSpreadsheetClick() {
   gapi.client
     .request({
       path: "https://www.googleapis.com/drive/v3/files",
-      method: "post",
+      method: "POST",
       body: {
         name: spreadsheetName,
         mimeType: "application/vnd.google-apps.spreadsheet",
@@ -468,7 +477,7 @@ function handleShareFile() {
   gapi.client
     .request({
       path: `https://www.googleapis.com/drive/v3/files/${currentSharedFileId}/permissions?emailMessage='Good day. Please find attached the Shopping List of the month.'`,
-      method: "post",
+      method: "POST",
       body: {
         role: "writer",
         type: "user",
@@ -479,6 +488,25 @@ function handleShareFile() {
       // console.log(response);
       handleDisplayFileSharedWith(currentSharedFileId);
     });
+}
+
+function handleUpdateSharedFileRole(permissionId, role) {
+  // console.log("Current Shared File", currentSharedFileId);
+  // console.log("PermissionId", permissionId);
+  // console.log("role", role);
+  gapi.client
+    .request({
+      path: `https://www.googleapis.com/drive/v3/files/${currentSharedFileId}/permissions/${permissionId}`,
+      method: "PATCH",
+      body: {
+        role: role,
+      },
+    })
+    .then((response) => {
+      // console.log(response);
+      handleDisplayFileSharedWith(currentSharedFileId);
+    })
+    .catch((error) => console.log(error));
 }
 
 function handleRemoveShareFile(permissionId) {
@@ -499,7 +527,7 @@ function handleCreateNewItemClick() {
   gapi.client
     .request({
       path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/Sheet1!A1:D1:append?valueInputOption=USER_ENTERED`,
-      method: "post",
+      method: "POST",
       body: {
         values: [[itemName, isPurchased]],
       },
@@ -520,7 +548,7 @@ function handleUpdateItem(itemClassName) {
   gapi.client
     .request({
       path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}?valueInputOption=USER_ENTERED`,
-      method: "put",
+      method: "PUT",
       body: {
         values: [itemData],
       },
@@ -540,7 +568,7 @@ function handleClearItem(itemClassName) {
     .request({
       path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/${range}:clear`,
       // path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values:batchClear`,
-      method: "post",
+      method: "POST",
       body: { ranges: [range] },
     })
     .then(function (response) {
@@ -552,7 +580,7 @@ function handleRemoveItem(itemRowNumber) {
   gapi.client
     .request({
       path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}:batchUpdate`,
-      method: "post",
+      method: "POST",
       body: {
         requests: [
           {
