@@ -15,22 +15,25 @@
       <button id="listFilesButton" style="margin-top: 10px">List Files</button>
       <button id="listFoldersButton">List Folders</button>
       <button id="listSpreadsheetsButton">List Spreadsheets</button>
-      <div style="margin-top: 5px">
+      <div id="createFolder">
         <button id="createFolderButton">Create Folder</button>
-        <button id="createSpreadsheetButton">Create Spreadsheet</button>
+        <input id="createFolderInput" placeholder="Folder name" />
       </div>
-      <input
-        id="createInput"
-        style="margin-top: 5px"
-        placeholder="Folder or Spreadsheet name"
-      />
-      <table id="table1" style="margin-top: 20px">
+      <div id="createSpreadsheet">
+        <button id="createSpreadsheetButton">Create Spreadsheet</button>
+        <input id="createSpreadsheetInput" placeholder="Spreadsheet name" />
+      </div>
+      <div id="createShoppingList">
+        <button id="createShoppingListButton">Create ShoppingList</button>
+        <input id="createShoppingListInput" placeholder="Shopping List name" />
+      </div>
+      <table id="table1">
         <caption id="table1Caption"></caption>
         <thead id="table1Head"></thead>
         <tbody id="table1Body"></tbody>
         <tfoot id="table1Foot"></tfoot>
       </table>
-      <div id="addItemDiv" style="display: none; margin-top: 20px">
+      <div id="addItemDiv" style="display: none">
         <button id="createNewItemButton" style="display: block">
           Add New Item
         </button>
@@ -41,13 +44,13 @@
           <option value="false">Not Purchased</option>
         </select>
       </div>
-      <table id="table2" style="margin-top: 20px">
+      <table id="table2">
         <caption id="table2Caption"></caption>
         <thead id="table2Head"></thead>
         <tbody id="table2Body"></tbody>
         <tfoot id="table2Foot"></tfoot>
       </table>
-      <div id="shareDiv" style="display: none; margin-top: 20px">
+      <div id="shareDiv" style="display: none">
         <button id="shareButton" style="display: block">Share</button>
         <input type="email" id="shareInput" placeholder="user@nanosoft.co.za" />
         <select id="shareSelect">
@@ -55,7 +58,7 @@
           <option value="reader">Reader</option>
           <option value="writer">Writer</option>
         </select>
-        <table id="table3" style="margin-top: 20px">
+        <table id="table3">
           <caption id="table3Caption"></caption>
           <thead id="table3Head"></thead>
           <tbody id="table3Body"></tbody>

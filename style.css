@@ -1,6 +1,17 @@
+div {
+  margin-top: 20px;
+}
+
+#createFolder,
+#createSpreadsheet,
+#createShoppingList {
+  margin-top: 10px;
+}
+
 table {
   border-collapse: collapse;
   display: none;
+  margin-top: 20px;
 }
 
 td,
