@@ -47,6 +47,7 @@ const alphabet = [
   "Z",
 ];
 const roles = ["owner", "writer", "reader", "commenter"];
+var appFolderId = "";
 
 var authorizeButton = document.getElementById("authorizeButton");
 var authorizedComponents = document.getElementById("authorizedComponents");
@@ -340,9 +341,13 @@ function handleCreateFolderClick() {
       },
     })
     .then(function (response) {
-      createFolderInput.value = "";
-      // appendPre(`Folder ${folderName} Created Successfully`);
-      reRenderTable1();
+      // console.log(response);
+      if (response.status === 200) {
+        createFolderInput.value = "";
+        // appendPre(`Folder ${folderName} Created Successfully`);
+        appFolderId = response.result.id;
+        reRenderTable1();
+      }
     })
     .catch((error) => {
       appendPre(`Folder ${folderName} could not be created`);
@@ -418,6 +423,22 @@ function handleListSpreadsheetsClick() {
       setTable1Headings(filesFoldersHeadings);
       var files = response.result.files;
       setTable1RowsForFilesFolders(files);
+    });
+}
+
+function handleMoveSpreadsheet(spreadsheetId) {
+  gapi.client
+    .request({
+      path: `https://www.googleapis.com/drive/v3/files/${spreadsheetId}?addParents=${appFolderId}`,
+      method: "PATCH",
+      body: {},
+    })
+    .then(function (response) {
+      // console.log(response);
+      reRenderTable1();
+    })
+    .catch((error) => {
+      console.log(error);
     });
 }
 
@@ -568,12 +589,16 @@ function handleCreateShoppingListClick() {
       },
     })
     .then(function (response) {
-      createSpreadsheetInput.value = "";
-      // appendPre(`Spreadsheet ${shoppingListName} Created Successfully`);
-      reRenderTable1();
+      // console.log(response);
+      if (response.status === 200) {
+        createSpreadsheetInput.value = "";
+        handleMoveSpreadsheet(response.result.spreadsheetId);
+        // appendPre(`Spreadsheet ${shoppingListName} Created Successfully`);
+        // reRenderTable1();
+      }
     })
     .catch((error) => {
-      appendPre(`Spreadsheet ${shoppingListName} could not be created`);
+      // appendPre(`Spreadsheet ${shoppingListName} could not be created`);
     });
 }
 
@@ -583,13 +608,14 @@ function handleCreateNewItemClick() {
   var isPurchased = document.getElementById("isPurchased").value;
   gapi.client
     .request({
-      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/Sheet1!A1:D1:append?valueInputOption=USER_ENTERED`,
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/Sheet1!A1:B50:append?valueInputOption=RAW`,
       method: "POST",
       body: {
         values: [[itemName, isPurchased]],
       },
     })
     .then(function (response) {
+      console.log(response);
       createItemNameInput.value = "";
       // console.log(response);
       reRenderTable2();
@@ -607,7 +633,7 @@ function handleDisplaySheetData(fileId) {
       path: `https://sheets.googleapis.com/v4/spreadsheets/${fileId}?includeGridData=true`,
     })
     .then(function (response) {
-      // console.log(response);
+      console.log(response);
       // console.log(JSON.parse(response.body));
       // console.log(response.result.sheets[0].data[0].rowData[0]);
       let sheetData = response.result.sheets[0].data[0].rowData.map(
